@@ -1,6 +1,10 @@
-# LoLEsportsSpectate
+# lol-esports-spectate
 JS Api for creating a custom view for a tournament draft spectator with a example like the official one used in the competetive scene.
 
+
+## Example Application
+
+For an example application using this module to create something like the official esports spectator go [here](./example/README.md)
 ## Download
 LolEsportsSpectate is installable via:
 
