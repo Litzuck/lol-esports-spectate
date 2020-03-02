@@ -1,2 +1,0 @@
-get summonerName in Champselect  GET /lol-summoner/v1/summoners/{id}
-summonerName in Lobby  GET /lol-lobby/v2/lobby or OnJsonApiEvent_lol-lobby_v2_lobby

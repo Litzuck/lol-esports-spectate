@@ -1,27 +1,26 @@
 {
-  "name": "lol-esports-spectate",
+  "name": "client",
   "version": "1.0.0",
-  "description": "API for League of Legends champion select spectater",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
+  "description": "Esports spectate example",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Litzuck",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^6.1.9",
+    "electron-packager": "^14.2.0"
   },
   "dependencies": {
     "lcu-connector": "^2.1.2",
-    "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "ws": "^7.1.2"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Litzuck/LoLEsportsSpectate.git"
   },
-  "author": "Litzuck",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Litzuck/LoLEsportsSpectate/issues"
   },

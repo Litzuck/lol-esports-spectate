@@ -1,5 +1,4 @@
-const { app, BrowserWindow, Menu, MenuItem } = require('electron')
-const LCUConnector = require('lcu-connector')
+const { app, BrowserWindow } = require('electron')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -18,7 +17,7 @@ function createWindow() {
         frame: true,
     })
     // and load the index.html of the app.
-    win.loadFile('index3.html')
+    win.loadFile('index.html')
 
     // Open the DevTools.
     // win.webContents.openDevTools()
