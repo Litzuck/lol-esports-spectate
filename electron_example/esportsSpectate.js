@@ -1,6 +1,6 @@
 const { remote } = require('electron')
 const { Menu, MenuItem } = remote
-const ChampSelectAPI = require("../index.js")
+const ChampSelectAPI = require("lol-esports-spectate")
 var api = new ChampSelectAPI()
 api.start()
 var timerLeft = 0

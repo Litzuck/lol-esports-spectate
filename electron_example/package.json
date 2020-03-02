@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "lol-esports-spectate-client",
   "version": "1.0.0",
   "description": "Esports spectate example",
   "main": "main.js",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "lcu-connector": "^2.1.2",
+    "lol-esports-spectate": "file:..",
     "request-promise": "^4.2.5",
     "ws": "^7.1.2"
   },
