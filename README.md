@@ -9,7 +9,7 @@ For an example application using this module to create something like the offici
 LolEsportsSpectate is installable via:
 
 - [GitHub](https://github.com/Litzuck/LoLEsportsSpectate) `git clone https://github.com/Litzuck/LoLEsportsSpectate.git`
-- [npm](https://www.npmjs.com/): `npm install lol-esports-spectate` (not yet released)
+- [npm](https://www.npmjs.com/): `npm install lol-esports-spectate`
 
 ## Usage example
 
