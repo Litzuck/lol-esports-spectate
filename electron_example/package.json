@@ -4,19 +4,20 @@
   "description": "Esports spectate example",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package-win": "electron-packager . --overwrite"
   },
   "author": "Litzuck",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^6.1.9",
-    "electron-packager": "^14.2.0"
+    "electron": "^6.1.12",
+    "electron-packager": "^14.2.1"
   },
   "dependencies": {
-    "lcu-connector": "^2.1.2",
-    "lol-esports-spectate": "file:..",
+    "lcu-connector": "^2.1.3",
+    "lol-esports-spectate": "^1.0.2",
     "request-promise": "^4.2.5",
-    "ws": "^7.1.2"
+    "ws": "^7.3.0"
   },
   "repository": {
     "type": "git",
