@@ -36,7 +36,7 @@ jobs:
           echo test, and deploy your project.
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
-      - run: npm install
-      - run: npm publish
+      - run: npm ci
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
