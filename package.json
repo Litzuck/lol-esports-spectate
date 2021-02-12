@@ -1,16 +1,16 @@
 {
   "name": "lol-esports-spectate",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "API for League of Legends champion select spectater",
   "main": "index.js",
   "directories": {
     "lib": "lib"
   },
   "dependencies": {
-    "lcu-connector": "^2.1.2",
+    "lcu-connector": "^2.1.3",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5",
-    "ws": "^7.1.2"
+    "request-promise": "^4.2.6",
+    "ws": "^7.4.3"
   },
   "devDependencies": {},
   "scripts": {
