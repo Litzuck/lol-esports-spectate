@@ -4,7 +4,8 @@ JS Api for creating a custom view for a tournament draft spectator with a exampl
 
 ## Example Application
 
-For an example application using this module to create something like the official esports spectator go [here](./example/README.md)
+~~For an example application using this module to create something like the official esports spectator go [here](./example/README.md)~~
+The example client has been moved to a standalone repository, which can be found [here](https://github.com/Litzuck/lol-spectator-overlay-client)
 ## Download
 LolEsportsSpectate is installable via:
 
