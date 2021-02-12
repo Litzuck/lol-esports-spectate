@@ -36,6 +36,9 @@ jobs:
           echo test, and deploy your project.
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: npm publish --access public
         env:
