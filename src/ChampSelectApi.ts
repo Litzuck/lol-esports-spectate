@@ -1,18 +1,18 @@
-const LCUApiWrapper = require('./lcu_api_wrapper')
-const {
-    EventEmitter
-} = require('events')
-const ChampionSelectReplay = require('./ChampionSelectReplay')
-const path = require('path')
+import {LCUApiWrapper} from "./lcu_api_wrapper";
+import EventEmitter from "events";
+import * as path from "path";
+import {ChampionSelectReplay} from "./ChampSelectReplay";
+import {LCUApiInterface} from "./LCUApiInterface"
+export class ChampSelectApi extends EventEmitter{
 
-class ChampSelectApi extends EventEmitter {
+    api: LCUApiInterface;
 
     constructor(replay = false, replay_file = "", log_path = "logs/") {
         super()
 
-        var _this = this
-        var lastAction = 0
-        var lastData = 0
+        var _this:ChampSelectApi = this
+        var lastAction: any
+        var lastData: any
         var lastActionIdx = 0
         if (replay) {
             this.api = new ChampionSelectReplay(replay_file)
@@ -41,7 +41,6 @@ class ChampSelectApi extends EventEmitter {
                         console.log('The replay file has been saved!');
                     });
                 }
-                // fs.eventType
             } else {
 
                 if (data.data.timer.phase == "GAME_STARTING") {
@@ -53,7 +52,7 @@ class ChampSelectApi extends EventEmitter {
                 var actions = data.data.actions
                 var latestActionIdx = actions.length - 1
                 var latestAction = actions[latestActionIdx][0]
-                for (var i = actions.length - 1; i >= 0; i--) {
+                for (let i = actions.length - 1; i >= 0; i--) {
                     if (actions[i][0].isInProgress) {
                         latestAction = actions[i][0]
                         latestActionIdx = i
@@ -71,12 +70,12 @@ class ChampSelectApi extends EventEmitter {
 
                     _this.emit('banTurnBegin', latestAction.pickTurn)
                     _this.emit('newTurnBegin', data.data.timer.adjustedTimeLeftInPhase / 1000)
-                    var i;
-                    for (i = 0; i < data.data.myTeam.length; i++) {
+                    
+                    for (let i = 0; i < data.data.myTeam.length; i++) {
                         _this.emit('summonerSpellChanged', i, 1, data.data.myTeam[i].spell1Id)
                         _this.emit('summonerSpellChanged', i, 2, data.data.myTeam[i].spell2Id)
                     }
-                    for (i = 0; i < data.data.theirTeam.length; i++) {
+                    for (let i = 0; i < data.data.theirTeam.length; i++) {
                         _this.emit('summonerSpellChanged', i + 5, 1, data.data.theirTeam[i].spell1Id)
                         _this.emit('summonerSpellChanged', i + 5, 2, data.data.theirTeam[i].spell2Id)
                     }
@@ -100,7 +99,7 @@ class ChampSelectApi extends EventEmitter {
                             if (latestAction.type == "pick") {
                                 _this.emit('championLocked', latestAction.championId, latestAction.actorCellId)
                             } else if (latestAction.type == "ban") {
-                                banTurn = latestAction.pickTurn
+                                let banTurn = latestAction.pickTurn
                                 if (latestActionIdx > 6)
                                     banTurn += 6
                                 _this.emit('championBanned', latestAction.championId, banTurn)
@@ -110,12 +109,12 @@ class ChampSelectApi extends EventEmitter {
                                 _this.emit('phaseChanged', "finalStage")
                             }
 
-                            for (i = 0; i < cdata.myTeam.length; i++) {
+                            for (let i = 0; i < cdata.myTeam.length; i++) {
                                 if (cdata.myTeam[i].championId != lastData.myTeam[i].championId) {
                                     _this.emit('championChanged', cdata.myTeam[i].championId, cdata.myTeam[i].cellId)
                                 }
                             }
-                            for (i = 0; i < cdata.theirTeam.length; i++) {
+                            for (let i = 0; i < cdata.theirTeam.length; i++) {
                                 if (cdata.theirTeam[i].championId != lastData.theirTeam[i].championId) {
                                     _this.emit('championChanged', cdata.theirTeam[i].championId, cdata.theirTeam[i].cellId)
                                 }
@@ -126,7 +125,7 @@ class ChampSelectApi extends EventEmitter {
                             if (lastAction.type == "pick") {
                                 _this.emit('championLocked', actions[lastActionIdx][0].championId, actions[lastActionIdx][0].actorCellId)
                             } else if (lastAction.type == "ban") {
-                                banTurn = actions[lastActionIdx][0].pickTurn
+                                let banTurn = actions[lastActionIdx][0].pickTurn
                                 if (latestActionIdx > 6)
                                     banTurn += 6
                                 _this.emit('championBanned', actions[lastActionIdx][0].championId, banTurn)
@@ -147,7 +146,7 @@ class ChampSelectApi extends EventEmitter {
                             _this.emit('playerTurnBegin', latestAction.actorCellId)
                         } else if (latestAction.type == "ban") {
                             //onBanTurn(latestAction.pickTurn)
-                            banTurn = latestAction.pickTurn
+                            let banTurn = latestAction.pickTurn
                             if (latestActionIdx > 6)
                                 banTurn += 6
                             _this.emit('banTurnBegin', banTurn)
@@ -156,14 +155,13 @@ class ChampSelectApi extends EventEmitter {
                         if (lastAction.type == "pick") {
                             _this.emit('playerTurnEnd', lastAction.actorCellId)
                         } else if (lastAction.type == "ban") {
-                            banTurn = actions[lastActionIdx][0].pickTurn
+                            let banTurn = actions[lastActionIdx][0].pickTurn
                             if (lastActionIdx > 6)
                                 banTurn += 6
                             _this.emit('banTurnEnd', banTurn)
                         }
                     }
-                    var i;
-                    for (i = 0; i < cdata.myTeam.length; i++) {
+                    for (let i = 0; i < cdata.myTeam.length; i++) {
                         if (cdata.myTeam[i].spell1Id != lastData.myTeam[i].spell1Id) {
                             _this.emit('summonerSpellChanged', i, 1, cdata.myTeam[i].spell1Id)
                         }
@@ -171,7 +169,7 @@ class ChampSelectApi extends EventEmitter {
                             _this.emit('summonerSpellChanged', i, 2, cdata.myTeam[i].spell2Id)
                         }
                     }
-                    for (i = 0; i < cdata.theirTeam.length; i++) {
+                    for (let i = 0; i < cdata.theirTeam.length; i++) {
                         if (cdata.theirTeam[i].spell1Id != lastData.theirTeam[i].spell1Id) {
                             _this.emit('summonerSpellChanged', i + 5, 1, cdata.theirTeam[i].spell1Id)
                         }
@@ -197,5 +195,3 @@ class ChampSelectApi extends EventEmitter {
         this.api.request(uri, callback)
     }
 }
-
-module.exports = ChampSelectApi;

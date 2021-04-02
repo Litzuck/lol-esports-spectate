@@ -1,19 +1,25 @@
-const fs = require('fs');
-const { EventEmitter } = require('events')
+import * as fs from "fs";
+import EventEmitter from "events"
+import {LCUApiInterface} from "./LCUApiInterface"
 
+export class ChampionSelectReplay extends EventEmitter implements LCUApiInterface{
 
-class ChampionSelectReplay extends EventEmitter{
-
+    replay:any
+    callbacks: Map<string,(data:any)=> void>
 
     constructor(replay_file){
         super()
         try {
             var data = fs.readFileSync(replay_file)
-            this.replay = JSON.parse(data)
+            this.replay = JSON.parse(data.toString())
           } catch (err) {
             console.error(err)
           }
-        this.callbacks = new Map()
+        this.callbacks = new Map();
+    }
+    
+    request(uri: string, ccallback: (data: any) => void): void {
+        throw new Error("Method not implemented.");
     }
 
 
@@ -33,9 +39,7 @@ class ChampionSelectReplay extends EventEmitter{
         });
     }
 
-    subscribe(event, callback){
+    subscribe(event:string, callback:(data:any)=> void){
         this.callbacks.set(event, callback)
     }
 }
-
-module.exports = ChampionSelectReplay;
