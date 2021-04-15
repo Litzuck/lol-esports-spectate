@@ -3,6 +3,7 @@ import EventEmitter from "events";
 import * as path from "path";
 import {ChampionSelectReplay} from "./ChampSelectReplay";
 import {LCUApiInterface} from "./LCUApiInterface"
+import { EventData } from "./internal/ExternalInterfaces";
 export class ChampSelectApi extends EventEmitter{
 
     api: LCUApiInterface;
@@ -24,7 +25,7 @@ export class ChampSelectApi extends EventEmitter{
             "jsons": []
         }
 
-        this.api.subscribe("OnJsonApiEvent_lol-champ-select_v1_session", function (data) {
+        this.api.subscribe("OnJsonApiEvent_lol-champ-select_v1_session", function (data:EventData) {
             json_data.jsons.push({
                 "time": Date.now() - start,
                 "data": data

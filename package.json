@@ -1,6 +1,6 @@
 {
   "name": "lol-esports-spectate",
-  "version": "1.1.3",
+  "version": "2.0.2-beta.1",
   "description": "API for League of Legends champion select spectater",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,11 +12,14 @@
     "lcu-connector": "^2.1.3",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "typescript": "^4.2.3",
-    "ws": "^7.4.3"
+    "tiny-typed-emitter": "^2.0.3",
+    "typescript": "^4.2.4",
+    "ws": "^7.4.4"
   },
   "devDependencies": {},
   "scripts": {
+    "clean": "if exist dist ( rd /S /Q dist)",
+    "updateLink": "npm run clean && tsc && npm rm lol-esports-spectate -g && npm link",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

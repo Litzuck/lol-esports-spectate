@@ -4,6 +4,8 @@ import { EventEmitter} from "events";
 import requestPromise from "request-promise";
 import {LCUApiInterface} from "./LCUApiInterface"
 
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
+
 export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
     callbacks: Map<string,(data:any) => void>;
     connector: LCUConnector;
@@ -33,14 +35,14 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
             });
 
             this.ws.on('unexpected-response', (msg:string) => {
-                console.log(msg)
+                console.log("unexpected message",msg)
             })
             this.ws.on('error', (err:string) => {
-                console.log(err)
+                console.log("error",err)
             })
             this.ws.on('message', (msg:string) => {
                 var data = JSON.parse(msg)
-                console.log(data)
+                // console.log(data)
                 var callback = this.callbacks.get(data[1])
                 if (callback != null)
                     callback(data[2])
@@ -88,7 +90,7 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
 
         })
             .then((response) => callback(response))
-            .catch((err) => { console.log(err) });
+            .catch((err) => { console.log("err") });
 
     }
 }
