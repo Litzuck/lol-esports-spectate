@@ -90,7 +90,7 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
 
         })
             .then((response) => callback(response))
-            .catch((err) => { console.log("err") });
+            //.catch((err) => { console.log("Error in REST API Request.", err); });
 
     }
 }
