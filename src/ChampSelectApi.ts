@@ -1,4 +1,4 @@
-import {LCUApiWrapper} from "./lcu_api_wrapper";
+import {LCUApiWrapper} from "./LCUApiWrapper";
 import EventEmitter from "events";
 import * as path from "path";
 import {ChampionSelectReplay} from "./ChampSelectReplay";

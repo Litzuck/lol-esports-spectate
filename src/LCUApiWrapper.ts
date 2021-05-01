@@ -3,6 +3,7 @@ import LCUConnector from "lcu-connector";
 import { EventEmitter} from "events";
 import requestPromise from "request-promise";
 import {LCUApiInterface} from "./LCUApiInterface"
+import ReconnectingWebSocket from "./internal/ReconnectingWebSocket"
 
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
 
@@ -27,7 +28,7 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
             this.user = "riot"
             this.password = data.password
             this.port = data.port
-            this.ws = new WebSocket(`wss://riot:${data.password}@127.0.0.1:${data.port}/`, "wamp", {
+            this.ws = new ReconnectingWebSocket(`wss://riot:${data.password}@127.0.0.1:${data.port}/`, "wamp", {
                 origin: `https://127.0.0.1:${data.port}`,
                 Host: `127.0.0.1:${data.port}`,
                 Authorization: `Basic ${authkey}`
@@ -53,7 +54,7 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
 
             });
             this.ws.on('open', () => {
-                console.log("open")
+                // console.log("open")
                 //this.__ws.send('[5, "OnJsonApiEvent"]');
                 //this.__ws.send('[5, "OnJsonApiEvent_lol-champ-select_v1_session"]')
                 this.callbacks.forEach( (value:any, key:string) => {
@@ -65,6 +66,8 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
                 //     this.ws.send(`[5, "${key}"]`)
                 // }
             });
+
+            this.ws.connect();
 
         });
 
@@ -90,6 +93,7 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
 
         })
             .then((response) => callback(response))
+            .catch((err)=>{})
             //.catch((err) => { console.log("Error in REST API Request.", err); });
 
     }

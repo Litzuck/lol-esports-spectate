@@ -1,4 +1,4 @@
-import { LCUApiWrapper } from "./lcu_api_wrapper"
+import { LCUApiWrapper } from "./LCUApiWrapper"
 import EventEmitter from "events";
 import * as path from "path";
 import { ChampionSelectReplay } from "./ChampSelectReplay"
@@ -90,7 +90,7 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
 
                     // blueSummonerNames = blueNames
                     // redSummonerNames = redNames
-                    console.log(this.summonerNameMap)
+                    // console.log(this.summonerNameMap)
                 });
             }, 5000);
 
@@ -108,6 +108,7 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
         }
         else if(eventData.eventType === "Create"){
             this.emit("championSelectStarted")
+            this.pickOrderState=null
         }
         else {
             
@@ -164,7 +165,7 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
 
         let theirTeam = data.theirTeam
         for (let i = 0; i < data.theirTeam.length; i++) {
-            let pick: Pick = { championId: theirTeam[i].championId, isCompleted: false, isPicking: false, spellId1: theirTeam[i].spell1Id, spellId2: theirTeam[i].spell2Id ,summonerName: this.summonerNameMap.get(myTeam[i].summonerId)}
+            let pick: Pick = { championId: theirTeam[i].championId, isCompleted: false, isPicking: false, spellId1: theirTeam[i].spell1Id, spellId2: theirTeam[i].spell2Id ,summonerName: this.summonerNameMap.get(theirTeam[i].summonerId)}
             state.redPicks[i] = pick
         }
 
