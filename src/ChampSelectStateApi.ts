@@ -22,6 +22,11 @@ interface ChampSelectStateApiEvents {
     'newPickOrder': (pickOrder:State)=> void;
 }
 
+export interface ChampSelectStateApiOptions{
+    recordReplays?:boolean;
+    replayFolder?:string;
+}
+
 export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents> {
 
     summonerNameMap: Map<number, string|any>;
@@ -29,36 +34,41 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
     replay:boolean;
     jsonData: { jsons:[{ time:number, data:EventData}?], summonerNameMap?: any};
     start: number = 0;
+    leagueApi: LCUApiInterface;
+    getSummonersRequestIntervall;
+    options: ChampSelectStateApiOptions = {
+        recordReplays: false,
+        replayFolder: null
+    }
 
-    constructor(replay?: boolean, replay_file?: string) {
+    constructor(replay?: boolean, replay_file?: string, options?:ChampSelectStateApiOptions) {
         super()
 
         this.summonerNameMap = new Map();
         this.replay = replay;
-        var leagueApi: LCUApiInterface;
+        if(options){
+            this.options = options;
+        }
         if (replay) {
             let replayBuf = fs.readFileSync(replay_file);
             let replayJson = JSON.parse(replayBuf.toString());
             if(replayJson.summonerNameMap)
                 this.summonerNameMap = new Map(Object.entries(replayJson.summonerNameMap).map(entry => {return [parseInt(entry[0]), entry[1]];}))
-            leagueApi = new ChampionSelectReplay(replay_file = replay_file)
+            this.leagueApi = new ChampionSelectReplay(replay_file = replay_file)
         }
         else {
-            leagueApi = new LCUApiWrapper();
+            this.leagueApi = new LCUApiWrapper();
         }
 
-        leagueApi.subscribe("OnJsonApiEvent_lol-champ-select_v1_session", this.champSelectEventCallback.bind(this))
+        this.leagueApi.subscribe("OnJsonApiEvent_lol-champ-select_v1_session", this.champSelectEventCallback.bind(this))
 
 
-        leagueApi.start()
+        this.leagueApi.start();
 
-        var blueSummonerNames = []
-        var redSummonerNames = []
+        if(this.leagueApi instanceof LCUApiWrapper){
 
-        if(leagueApi instanceof LCUApiWrapper){
-
-            var getSummonersRequestInt = setInterval(() => {
-                leagueApi.request("lol-lobby/v2/lobby/members", (data: string) => {
+            this.getSummonersRequestIntervall = setInterval(() => {
+                this.leagueApi.request("lol-lobby/v2/lobby/members", (data: string) => {
 
                     let members = JSON.parse(data)
                     Array.prototype.forEach.call(members ,(member, idx) => {
@@ -66,10 +76,17 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
                         if (!this.summonerNameMap.has(member.summonerId))
                             this.summonerNameMap.set(member.summonerId, member.summonerName)
                     });
+                }, 
+                () => { err => console.error("Error getting summoner names. Trying again in 5 seconds.");
                 });
             }, 5000);
 
         }
+    }
+
+
+    stop(){
+        clearInterval(this.getSummonersRequestIntervall);
     }
 
 
@@ -98,12 +115,21 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
         }
         this.jsonData.jsons.push({time: Date.now()-this.start, data:eventData})
 
-        if (!this.replay && eventData.eventType === "Delete") {
+        if (!this.replay && this.options.recordReplays && eventData.eventType === "Delete") {
             this.jsonData.summonerNameMap = Object.fromEntries(this.summonerNameMap)
             let now = Date.now();
             var fs = require('fs');
-            var log_file = path.join('./','logs', 'replay_' + now + '.json')
-            fs.writeFile(log_file, JSON.stringify(this.jsonData), 'utf8', (err) => {
+            var replayFileName = 'replay_'+now+'.json';
+            if(!this.options.replayFolder){
+                throw new Error("No replay folder specified");
+            }
+            var logFilePath = path.join(this.options.replayFolder, replayFileName)
+
+            if (!fs.existsSync(this.options.replayFolder)) {
+                fs.mkdirSync(this.options.replayFolder);
+            }
+            
+            fs.writeFile(logFilePath, JSON.stringify(this.jsonData), 'utf8', (err) => {
                 if (err) throw err;
                 console.log('The replay file has been saved!');
             });
@@ -144,6 +170,7 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
             actingSide: "none",
             timestamp: 0,
             phase: "",
+            turnId: 0,
         }
 
         var blueBanCounter = 0
@@ -234,10 +261,31 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
 
         state.timestamp = data.timer.internalNowInEpochMs
 
+        let turnID = 0;
+        for (let i = 0; i < data.actions.length; i++) {
+
+            if(data.actions[i][0].isInProgress){
+                break;
+            }
+            turnID++;
+        }
+
+        state.turnId = turnID;
 
         this.lastState = state
         return state
 
+    }
+
+
+    getConnectionStatus(){
+        if (!this.leagueApi)
+            return "Not connected";
+        if (this.replay)
+            return "Replay";
+        if (this.leagueApi.getConnectedStatus())
+            return "Connected";
+        return "Not connected";
     }
 
 }

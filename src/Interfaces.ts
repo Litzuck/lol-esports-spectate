@@ -1,4 +1,5 @@
 export interface State{
+    turnId: number;
     started: boolean;
     bluePicks: Array<Pick>;
     redPicks:Array<Pick>;

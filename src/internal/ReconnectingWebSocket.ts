@@ -79,7 +79,7 @@ export default class ReconnectingWebSocket extends EventEmitter{
             if (this.manualClosed) {
                 return;
             }
-                console.log(`try to reconnect to the web-socket server...`);
+            console.log(`Trying to reconnect to the web-socket server...`);
             
             this.emit('reconnect');
             /** Connect again with the same url */
@@ -94,5 +94,9 @@ export default class ReconnectingWebSocket extends EventEmitter{
     close(){
         this.manualClosed =true;
         this.webSocket.close();
+    }
+
+    readyState(){
+        return this.webSocket.readyState;
     }
 }

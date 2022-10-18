@@ -45,11 +45,9 @@ export class ChampSelectApi extends EventEmitter{
             } else {
 
                 if (data.data.timer.phase == "GAME_STARTING") {
-                    console.log("champSelectFinished")
                     _this.emit('champSelectFinished')
                 }
 
-                console.log(data)
                 var actions = data.data.actions
                 var latestActionIdx = actions.length - 1
                 var latestAction = actions[latestActionIdx][0]
@@ -60,7 +58,6 @@ export class ChampSelectApi extends EventEmitter{
                         break
                     }
                 }
-                //console.log(latestAction)
 
                 if (data.eventType == "Create") {
 
@@ -82,12 +79,6 @@ export class ChampSelectApi extends EventEmitter{
                     }
                 } else if (data.eventType == "Update") {
                     var cdata = data.data
-                    // console.log(data)
-                    //console.log("last data:")
-                    console.log("New Data received")
-                    console.log(cdata)
-
-
 
                     _this.emit('newTurnBegin', cdata.timer.adjustedTimeLeftInPhase / 1000)
                     if (lastAction.id == latestAction.id) {
@@ -143,10 +134,8 @@ export class ChampSelectApi extends EventEmitter{
 
 
                         if (latestAction.type == "pick") {
-                            //onPlayerTurn(latestAction.actorCellId)
                             _this.emit('playerTurnBegin', latestAction.actorCellId)
                         } else if (latestAction.type == "ban") {
-                            //onBanTurn(latestAction.pickTurn)
                             let banTurn = latestAction.pickTurn
                             if (latestActionIdx > 6)
                                 banTurn += 6
