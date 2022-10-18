@@ -1,11 +1,11 @@
 import { LCUApiWrapper } from "./LCUApiWrapper"
-import EventEmitter from "events";
 import * as path from "path";
 import { ChampionSelectReplay } from "./ChampSelectReplay"
 import { State, Pick, Ban } from "./Interfaces"
 import { EventData, Member } from "./internal/ExternalInterfaces"
 import { LCUApiInterface } from "./LCUApiInterface";
 import { TypedEmitter } from 'tiny-typed-emitter';
+import fs from 'fs'
 
 export declare interface ChampSelectApi{
     on(event:"championSelectEnd"):void;
@@ -24,42 +24,28 @@ interface ChampSelectStateApiEvents {
 
 export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents> {
 
-    summonerNameMap: Map<number, string>;
+    summonerNameMap: Map<number, string|any>;
     pickOrderState:State = null;
+    replay:boolean;
+    jsonData: { jsons:[{ time:number, data:EventData}?], summonerNameMap?: any};
+    start: number = 0;
 
     constructor(replay?: boolean, replay_file?: string) {
         super()
 
-        this.summonerNameMap = new Map()
+        this.summonerNameMap = new Map();
+        this.replay = replay;
         var leagueApi: LCUApiInterface;
         if (replay) {
+            let replayBuf = fs.readFileSync(replay_file);
+            let replayJson = JSON.parse(replayBuf.toString());
+            if(replayJson.summonerNameMap)
+                this.summonerNameMap = new Map(Object.entries(replayJson.summonerNameMap).map(entry => {return [parseInt(entry[0]), entry[1]];}))
             leagueApi = new ChampionSelectReplay(replay_file = replay_file)
         }
         else {
             leagueApi = new LCUApiWrapper();
         }
-        // leagueApi.subscribe("OnJsonApiEvent_lol-champ-select_v1_session", (eventData: EventData) => {
-        //     // console.log(eventData)
-        //     if (eventData.eventType === "Delete") {
-        //         //End of champion select
-        //         this.emit("championSelectEnd");
-        //     }
-        //     else if(eventData.eventType === "Create"){
-            
-        //     }
-        //     else {
-                
-        //         let state = this.parseData(eventData)
-        //         this.emit("newState", state)
-
-        //         if(this.pickOrderState===null && eventData.data.timer.phase==="FINALIZATION"){
-        //             this.pickOrderState = state;
-        //             // console.log(eventData)
-        //             this.emit("newPickOrder", this.pickOrderState)
-                    
-        //         }
-        //     }
-        // });
 
         leagueApi.subscribe("OnJsonApiEvent_lol-champ-select_v1_session", this.champSelectEventCallback.bind(this))
 
@@ -73,32 +59,18 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
 
             var getSummonersRequestInt = setInterval(() => {
                 leagueApi.request("lol-lobby/v2/lobby/members", (data: string) => {
-                    // let blueNames = []
-                    // let redNames = []
 
                     let members = JSON.parse(data)
-                    // console.log(members)
                     Array.prototype.forEach.call(members ,(member, idx) => {
                         // console.log(member)
                         if (!this.summonerNameMap.has(member.summonerId))
                             this.summonerNameMap.set(member.summonerId, member.summonerName)
-                        // if(member.teamId===100)
-                        //     blueNames.push(member.summonerName)
-                        // else if(member.teamId===200)
-                        //     redNames.push(member.summonerName)
                     });
-
-                    // blueSummonerNames = blueNames
-                    // redSummonerNames = redNames
-                    // console.log(this.summonerNameMap)
                 });
             }, 5000);
 
         }
-
-        // clearInterval(getSummonersRequestInt)
     }
-
 
 
     champSelectEventCallback(eventData: EventData): void {
@@ -109,6 +81,8 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
         else if(eventData.eventType === "Create"){
             this.emit("championSelectStarted")
             this.pickOrderState=null
+            this.jsonData = { jsons:[]}
+            this.start = Date.now();
         }
         else {
             
@@ -122,9 +96,33 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
                 
             }
         }
+        this.jsonData.jsons.push({time: Date.now()-this.start, data:eventData})
+
+        if (!this.replay && eventData.eventType === "Delete") {
+            this.jsonData.summonerNameMap = Object.fromEntries(this.summonerNameMap)
+            let now = Date.now();
+            var fs = require('fs');
+            var log_file = path.join('./','logs', 'replay_' + now + '.json')
+            fs.writeFile(log_file, JSON.stringify(this.jsonData), 'utf8', (err) => {
+                if (err) throw err;
+                console.log('The replay file has been saved!');
+            });
+        }
 
     }
 
+
+    autoConvertMapToObject = (map) => {
+        const obj = {};
+        for (const item of [...map]) {
+          const [
+            key,
+            value
+          ] = item;
+          obj[key] = value;
+        }
+        return obj;
+      }
 
     lastState: State;
     
@@ -169,18 +167,6 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
             state.redPicks[i] = pick
         }
 
-        // let myBans = data.bans.myTeamBans
-        // for(let i=0; i< data.theirTeam.length;i++){
-        //     let ban:Ban = {championId: myBans[i], isActive:false, isCompleted:false}
-        //     state.blueBans[i]=ban
-        // }
-
-        // let theirBans = data.bans.theirTeamBans
-        // for(let i=0; i< data.theirTeam.length;i++){
-        //     let ban:Ban = {championId: theirBans[i], isActive:false, isCompleted:false}
-        //     state.redBans[i]=ban
-        // }
-
         for (let i = 0; i < data.bans.numBans / 2; i++) {
             let banBlue: Ban = { championId: 0, isActive: false, isCompleted: false }
             let banRed: Ban = { championId: 0, isActive: false, isCompleted: false }
@@ -207,7 +193,6 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
             }
 
             else if (actionData.type === "pick") {
-                // let pick:Pick = {championId: actionData.championId, isCompleted: actionData.completed, isPicking: actionData.isInProgress, spellId1:0,spellId2:0 }
                 if (actionData.isAllyAction) {
                     state.bluePicks[bluePickCounter].isCompleted = actionData.completed;
                     state.bluePicks[bluePickCounter].isPicking = actionData.isInProgress;
@@ -223,17 +208,6 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
             if (actionData.isInProgress)
                 currentActionIsAlly = actionData.isAllyAction
         });
-
-        // for(let i = 0; i<data.myTeam.length; i++){
-        //     state.bluePicks[i].spellId1 = data.myTeam[i].spell1Id
-        //     state.bluePicks[i].spellId2 = data.myTeam[i].spell2Id
-        // }
-
-
-        // for(let i = 0; i<data.theirTeam.length; i++){
-        //     state.redPicks[i].spellId1 = data.theirTeam[i].spell1Id
-        //     state.redPicks[i].spellId2 = data.theirTeam[i].spell2Id
-        // }
 
         if (data.timer.phase === "BAN_PICK") {
             if (data.actions[data.actions.length - 1][0].type === "ban") { //BAN PHASE

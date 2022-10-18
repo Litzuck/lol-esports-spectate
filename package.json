@@ -1,6 +1,6 @@
 {
   "name": "lol-esports-spectate",
-  "version": "2.0.2-beta.1",
+  "version": "2.0.2-beta.23",
   "description": "API for League of Legends champion select spectater",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

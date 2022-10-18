@@ -8,6 +8,8 @@ import ReconnectingWebSocket from "./internal/ReconnectingWebSocket"
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
 
 export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
+
+    static instance: LCUApiWrapper;
     callbacks: Map<string,(data:any) => void>;
     connector: LCUConnector;
     user: string;
@@ -15,6 +17,7 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
     password: string;
     port: number;
     ws: WebSocket;
+    connected: boolean = false;
 
     constructor() {
         super()
@@ -47,29 +50,27 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
                 var callback = this.callbacks.get(data[1])
                 if (callback != null)
                     callback(data[2])
-                // if (/\/lol-champ-select\/.*/.test()) {
-                //     console.log("Ch")
-                // }
-                // console.log(JSON.parse(msg))
 
             });
             this.ws.on('open', () => {
-                // console.log("open")
-                //this.__ws.send('[5, "OnJsonApiEvent"]');
-                //this.__ws.send('[5, "OnJsonApiEvent_lol-champ-select_v1_session"]')
                 this.callbacks.forEach( (value:any, key:string) => {
                     console.log(key + " subscribed to");
                     this.ws.send(`[5, "${key}"]`);
-                })
-                // for (var key of this.callbacks.keys()) {
-                //     console.log(key + " subscribed to")
-                //     this.ws.send(`[5, "${key}"]`)
-                // }
+                });
+                this.connected = true;
+            });
+
+            this.ws.on('close', () => {
+                this.connected = false;
             });
 
             this.ws.connect();
 
         });
+
+        this.connector.on("disconnect", ()=>{
+            this.ws.close()
+        })
 
     }
 
@@ -86,15 +87,25 @@ export class LCUApiWrapper extends EventEmitter implements LCUApiInterface{
     }
 
 
-    request(uri:string, callback:(data:any)=> void) {
+    request(uri:string, callback:(data:any)=> void, errorCallback?:(error:Error)=>any) {
         requestPromise({
             strictSSL: false,
             url: `https://${this.user}:${this.password}@127.0.0.1:${this.port}/${uri}`,
 
         })
             .then((response) => callback(response))
-            .catch((err)=>{})
+            .catch(errorCallback)
             //.catch((err) => { console.log("Error in REST API Request.", err); });
 
+    }
+
+    static getInstance(){
+        if(!LCUApiWrapper.instance)
+            LCUApiWrapper.instance = new LCUApiWrapper()
+        return LCUApiWrapper.instance;
+    }
+
+    getConnectedStatus():boolean {
+        return this.connected;
     }
 }

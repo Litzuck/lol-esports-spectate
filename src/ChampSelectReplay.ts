@@ -18,11 +18,9 @@ export class ChampionSelectReplay extends EventEmitter implements LCUApiInterfac
         this.callbacks = new Map();
     }
     
-    request(uri: string, ccallback: (data: any) => void): void {
+    request(uri: string, callback: (data: any) => void): void {
         throw new Error("Method not implemented.");
     }
-
-
 
     start(){
         var dataJSONs = this.replay.jsons;
@@ -41,5 +39,9 @@ export class ChampionSelectReplay extends EventEmitter implements LCUApiInterfac
 
     subscribe(event:string, callback:(data:any)=> void){
         this.callbacks.set(event, callback)
+    }
+
+    getConnectedStatus():boolean{
+        return false
     }
 }

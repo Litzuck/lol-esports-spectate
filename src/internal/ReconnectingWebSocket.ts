@@ -1,4 +1,4 @@
-import EventEmitter from "node:events";
+import EventEmitter from "events";
 import WebSocket from "ws";
 
 export default class ReconnectingWebSocket extends EventEmitter{
@@ -85,5 +85,14 @@ export default class ReconnectingWebSocket extends EventEmitter{
             /** Connect again with the same url */
             this.connect();
         }, this.reconnectingInterval);
+    }
+
+    send(data:any){
+        this.webSocket.send(data)
+    }
+
+    close(){
+        this.manualClosed =true;
+        this.webSocket.close();
     }
 }
