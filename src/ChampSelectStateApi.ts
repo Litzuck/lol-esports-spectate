@@ -45,6 +45,7 @@ export class ChampSelectStateApi extends TypedEmitter<ChampSelectStateApiEvents>
         super()
 
         this.summonerNameMap = new Map();
+        this.jsonData = { jsons:[]};
         this.replay = replay;
         if(options){
             this.options = options;
